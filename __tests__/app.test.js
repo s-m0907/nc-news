@@ -32,3 +32,13 @@ describe('CORE: GET /api/topics', () => {
         .expect(404)
         })    
         });
+
+    describe('CORE: GET /api', () => {
+        test('GET:200 responds with an object describing all available endpoints', () => {
+            return request(app).get('/api')
+            .expect(200)
+            .then((response) => {
+            expect(typeof response).toBe('object')
+            })
+        });
+    });
