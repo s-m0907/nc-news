@@ -1,6 +1,6 @@
 const express = require("express");
-const { getTopics, getEndpoints, getArticleById } = require("./controller");
-
+const { getTopics, getEndpoints, getArticleById, getArticles } = require("./controller");
+const { handleCustomErrors, handlePsqlErrors, handleServerErrors } = require("./errors.controller.js")
 const app = express();
 
 app.use(express.json());
@@ -11,21 +11,12 @@ app.get('/api', getEndpoints)
 
 app.get('/api/articles/:article_id', getArticleById)
 
-app.use((err, req, res, next) => {
-    if (err.status) {
-      res.status(err.status).send({ msg: err.msg });
-    } else next(err);
-  });
-  
-  app.use((err, req, res, next) => {
-    if (err.code === '22P02') {
-      res.status(400).send({ msg: 'Bad request' });
-    } else next(err);
-  });
-  
-  app.use((err, req, res, next) => {
-    console.log(err);
-    res.status(500).send({ msg: 'Internal Server Error' });
-  });
+app.get('/api/articles', getArticles)
+
+app.use(handleCustomErrors)
+
+app.use(handlePsqlErrors)
+
+app.use(handleServerErrors)
 
 module.exports = app
