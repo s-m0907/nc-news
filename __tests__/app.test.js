@@ -1,15 +1,10 @@
 const db = require("../db/connection.js");
 const app = require("../app.js");
 const seed = require("../db/seeds/seed.js");
-const {
-  topicData,
-  userData,
-  articleData,
-  commentData,
-} = require("../db/data/test-data/index.js");
+const { topicData, userData, articleData, commentData } = require("../db/data/test-data/index.js");
 const request = require("supertest");
 
-beforeEach(() => seed({ topicData, userData, articleData, commentData }));
+beforeEach(() => seed({topicData, userData, articleData, commentData }));
 
 afterAll(() => db.end());
 
@@ -35,7 +30,8 @@ describe("CORE: GET /api", () => {
       .get("/api")
       .expect(200)
       .then((response) => {
-        expect(typeof response).toBe("object");
+        expect(typeof response.body).toBe("object");
+        expect(response.body).toHaveProperty("endpoints")
       });
   });
 });
@@ -69,6 +65,55 @@ describe("CORE: GET /api/articles/:article_id", () => {
       .expect(400)
       .then((response) => {
           expect(response.body.msg).toBe('Bad request')
+      })
+    });
+  });
+
+  describe('CORE: GET /api/articles', () => {
+    test('GET:200 responds with an array of all article objects with correct properties', () => {
+        return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then((response) => {
+            const articles = response.body.articles
+            articles.forEach((article) => {
+                expect(article).toHaveProperty('author')
+                expect(article).toHaveProperty('title')
+                expect(article).toHaveProperty('article_id')
+                expect(article).toHaveProperty('topic')
+                expect(article).toHaveProperty('created_at')
+                expect(article).toHaveProperty('votes')
+                expect(article).toHaveProperty('article_img_url')
+                expect(article).not.toHaveProperty('body')
+                expect(article).toHaveProperty('comment_count')
+
+            })
+        })
+    });
+    test('GET:200 article array is sorted by date descending as a default', () => {
+      return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then((response) => {
+        const articles = response.body.articles
+        const oldestArticle = articles[articles.length -1]
+        expect(oldestArticle.article_id).toBe(7)
+      })
+    });
+    test('GET:400 responds with status code and error message when passed an invalid sort by', () => {
+      return request(app)
+      .get("/api/articles?sort_by=flavour")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid sort query")
+      })
+    });
+    test('GET:400 responds with status code and error message when passed invalid order query', () => {
+      return request(app)
+      .get("/api/articles?order=alphabetical")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid order query")
       })
     });
   });
