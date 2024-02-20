@@ -1,6 +1,5 @@
 const db = require("./db/connection.js");
 const fs = require("fs/promises");
-const { convertTimestampToDate, createRef } = require('./db/seeds/utils')
 
 exports.selectTopics = () => {
   return db.query(`SELECT * FROM topics`).then((result) => {
@@ -28,26 +27,34 @@ exports.selectArticle = (article_id) => {
     });
 };
 
-exports.selectArticles = (sort_by = "created_at", order = "desc"
-) => {
-  if (!["author", "title", "article_id", "topic", "created_at", "votes", "article_img_url"].includes(sort_by)) {
-    return Promise.reject({ status: 400, msg: "Invalid sort query" });
-  }
-  if (!["asc", "desc"].includes(order)) {
-    return Promise.reject({ status: 400, msg: "Invalid order query" });
-  }
-
+exports.selectArticles = () => {
   let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id) AS comment_count
   FROM articles
   FULL JOIN comments ON articles.article_id = comments.article_id
-  GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url`
-
-  if(sort_by) {
-    queryString += ` ORDER BY ${sort_by} ${order}`;
-  }
+  GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url
+  ORDER BY created_at DESC`;
 
   return db.query(queryString).then((result) => {
-    return result.rows
+    return result.rows;
   });
 };
 
+exports.selectCommentsByArticle = (article) => {
+  let queryString = `SELECT * FROM comments`;
+  const queryValues = [];
+
+  if (article) {
+    queryValues.push(article);
+    queryString += ` WHERE article_id = $1 ORDER BY created_at DESC`;
+  }
+
+  return db.query(queryString, queryValues).then((result) => {
+    if (!result.rows[0]) {
+      return Promise.reject({
+        status: 404,
+        msg: `Article does not exist`,
+      });
+    }
+    return result.rows;
+  });
+};
