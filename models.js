@@ -42,11 +42,8 @@ exports.selectArticles = () => {
 exports.selectCommentsByArticle = (article) => {
   let queryString = `SELECT * FROM comments`;
   const queryValues = [];
-
-  if (article) {
     queryValues.push(article);
     queryString += ` WHERE article_id = $1 ORDER BY created_at DESC`;
-  }
 
   return db.query(queryString, queryValues).then((result) => {
     if (!result.rows[0]) {
@@ -57,4 +54,22 @@ exports.selectCommentsByArticle = (article) => {
     }
     return result.rows;
   });
+};
+
+exports.insertComment = (newComment, article) => {
+  const { username, body } = newComment;
+  if (body.length === 0 || !username || !body) {
+    return Promise.reject({
+      status: 400,
+      msg: `Invalid comment format`,
+    });
+  }
+  return db
+    .query(
+      "INSERT INTO comments (author, body, article_id) VALUES ($1, $2, $3) RETURNING *;",
+      [username, body, article]
+    )
+    .then((result) => {
+      return result.rows[0];
+    });
 };

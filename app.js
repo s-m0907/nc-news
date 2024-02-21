@@ -1,7 +1,9 @@
 const express = require("express");
-const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId } = require("./controller.js");
+const { getTopics, getEndpoints, getArticleById, getArticles, getCommentsByArticleId, postComment } = require("./controller.js");
 const { handleCustomErrors, handlePsqlErrors, handleServerErrors, handleInvalidEndpoint } = require("./errors.controller.js")
 const app = express();
+
+app.use(express.json())
 
 app.get('/api/topics', getTopics)
 
@@ -12,6 +14,7 @@ app.get('/api/articles/:article_id', getArticleById)
 app.get('/api/articles', getArticles)
 
 app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
+app.post('/api/articles/:article_id/comments', postComment)
 
 app.all("/*", handleInvalidEndpoint)
 
