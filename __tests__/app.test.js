@@ -2,15 +2,10 @@ const db = require("../db/connection.js");
 const app = require("../app.js");
 const seed = require("../db/seeds/seed.js");
 const sorted = require("jest-sorted");
-const {
-  topicData,
-  userData,
-  articleData,
-  commentData,
-} = require("../db/data/test-data/index.js");
+const data = require("../db/data/test-data/index.js");
 const request = require("supertest");
 
-beforeEach(() => seed({ topicData, userData, articleData, commentData }));
+beforeEach(() => seed(data));
 
 afterAll(() => db.end());
 
@@ -83,6 +78,70 @@ describe("/api/articles/:article_id", () => {
       .then((response) => {
         expect(response.body.msg).toBe("Bad request");
       });
+  });
+  test('PATCH:200 patches positive vote value to specific article and responds with the updated article', () => {
+    const newVote = {inc_votes : 1}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.article_id).toBe(1)
+      expect(article.votes).toBe(101)
+    })
+  });
+  test('PATCH:200 patches negative vote value to specific article and responds with the updated article', () => {
+    const newVote = {inc_votes : -100}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.article_id).toBe(1)
+      expect(article.votes).toBe(0)
+    })
+  });
+  test('PATCH:404 responds with appropriate status code and error message when article_id is valid but does not exist', () => {
+    const newVote = {inc_votes: 1}
+    return request(app)
+    .patch("/api/articles/999")
+    .send(newVote)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe('Article not found')
+    })
+  });
+  test('PATCH:400 responds with appropriate status code and error message when article_id is invalid', () => {
+    const newVote = {inc_votes: 1}
+    return request(app)
+    .patch("/api/articles/four")
+    .send(newVote)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  });
+  test('PATCH:400 responds with appropriate status code and message when vote decrement is more than existing votes', () => {
+    const newVote = {inc_votes : - 200}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  })
+  test('PATCH:400 responds with appropriate status code and error message when provided with an invalid newVote object', () => {
+    const newVote = {inc_votes: 'one'}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
   });
 });
 

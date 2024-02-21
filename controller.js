@@ -1,4 +1,4 @@
-const { selectTopics, readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment } = require('./models')
+const { selectTopics, readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment, updateVotes } = require('./models')
 
 exports.getTopics = (req, res, next) => {
     selectTopics().then((topics) => {
@@ -45,3 +45,12 @@ exports.postComment = (req, res, next) => {
     })
     .catch(next)
   };
+
+  exports.patchVotes = (req, res, next) => {
+    const newVotes = req.body.inc_votes
+    const article_id = req.params.article_id
+    updateVotes(newVotes, article_id).then((article) => {
+        res.status(200).send({ article })
+    })
+    .catch(next)
+  }
