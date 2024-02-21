@@ -262,4 +262,40 @@ describe("/api/articles/:article_id/comments", () => {
         expect(response.body.msg).toBe("Invalid comment format");
       });
   });
+  test('POST:404 responds with an appropriate status and error message for valid but non-existent article_id', () => {
+    return request(app)
+    .post('/api/articles/999/comments')
+    .send({
+      username: "icellusedkars",
+      body: "a comment",
+    })
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe("Not found")
+    })
+  });
+  test('POST:400 responds with appropriate status and error for an invalid article id', () => {
+    return request(app)
+    .post('/api/articles/four/comments')
+    .send({
+      username: "icellusedkars",
+      body: "a comment",
+    })
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  })
+  test('POST:404 responds with appropriate status and error message for valid but non-existent username', () => {
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send({
+      username: "not-a-user",
+      body: "a comment",
+    })
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe('Not found')
+    })
+  })
 });
