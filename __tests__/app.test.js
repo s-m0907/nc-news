@@ -2,7 +2,12 @@ const db = require("../db/connection.js");
 const app = require("../app.js");
 const seed = require("../db/seeds/seed.js");
 const sorted = require("jest-sorted");
-const { topicData, userData, articleData, commentData } = require("../db/data/test-data/index.js");
+const {
+  topicData,
+  userData,
+  articleData,
+  commentData,
+} = require("../db/data/test-data/index.js");
 const request = require("supertest");
 
 beforeEach(() => seed({ topicData, userData, articleData, commentData }));
@@ -20,7 +25,7 @@ describe("404 Invalid Endpoint", () => {
   });
 });
 
-describe("CORE: GET /api/topics", () => {
+describe("/api/topics", () => {
   test("GET:200 responds with an array of topic objects", () => {
     return request(app)
       .get("/api/topics")
@@ -36,7 +41,7 @@ describe("CORE: GET /api/topics", () => {
   });
 });
 
-describe("CORE: GET /api", () => {
+describe("/api", () => {
   test("GET:200 responds with an object describing all available endpoints", () => {
     return request(app)
       .get("/api")
@@ -48,7 +53,7 @@ describe("CORE: GET /api", () => {
   });
 });
 
-describe("CORE: GET /api/articles/:article_id", () => {
+describe("/api/articles/:article_id", () => {
   test("GET:200 responds with the article object for the given id", () => {
     return request(app)
       .get("/api/articles/1")
@@ -81,7 +86,7 @@ describe("CORE: GET /api/articles/:article_id", () => {
   });
 });
 
-describe("CORE: GET /api/articles", () => {
+describe("/api/articles", () => {
   test("GET:200 responds with an array of all article objects with correct properties", () => {
     return request(app)
       .get("/api/articles")
@@ -114,7 +119,7 @@ describe("CORE: GET /api/articles", () => {
   });
 });
 
-describe("CORE:GET /api/articles/:article_id/comments", () => {
+describe("/api/articles/:article_id/comments", () => {
   test("GET:200 responds with an array of comments with correct properties for the given article_id", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -127,9 +132,11 @@ describe("CORE:GET /api/articles/:article_id/comments", () => {
           expect(comment).toHaveProperty("created_at");
           expect(comment).toHaveProperty("author");
           expect(comment).toHaveProperty("body");
-          expect(comment).toHaveProperty("article_id");
+          expect(comment.article_id).toBe(1);
         });
         expect(comments.length).toBe(11);
+        expect(comments[0].body).toBe("I hate streaming noses");
+        expect(comments[0].author).toBe("icellusedkars");
       });
   });
   test("GET:200 responds an array of comments sorted by most recent comment", () => {
@@ -155,6 +162,45 @@ describe("CORE:GET /api/articles/:article_id/comments", () => {
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Bad request");
+      });
+  });
+  test("POST:201 posts a new comment for a specific article and returns that comment", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "my two cents",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then((response) => {
+        const comment = response.body.comment;
+        expect(comment.author).toBe("icellusedkars");
+        expect(comment.body).toBe("my two cents");
+        expect(comment.article_id).toBe(1);
+      });
+  });
+  test("POST:400 responds with an appropriate status and error message when provided with an invalid comment (empty body)", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "icellusedkars",
+        body: "",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid comment format");
+      });
+  });
+  test("POST:400 responds with an appropriate status and error message when provided with an invalid comment (no username)", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        body: "a comment",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid comment format");
       });
   });
 });
