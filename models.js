@@ -73,3 +73,26 @@ exports.insertComment = (newComment, article) => {
       return result.rows[0];
     });
 };
+
+exports.updateVotes = (votes, article) => {
+  return db.query(`SELECT * FROM articles WHERE article_id = $1`, [article])
+  .then((result) => {
+    if(!result.rows[0]) {
+      return Promise.reject({
+        status: 404,
+        msg: `Article not found`
+      })
+    }
+  }).then(() => {
+  return db.query(`UPDATE articles SET votes = votes + $1 WHERE article_id = $2 AND votes + $1 >= 0 RETURNING *`, [votes, article])
+  .then((result) => {
+      if(!result.rows[0]) {
+        return Promise.reject({
+          status: 400,
+          msg: `Bad request`,
+        });
+      }
+    return result.rows[0]
+  })
+})
+}
