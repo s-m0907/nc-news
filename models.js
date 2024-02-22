@@ -27,14 +27,25 @@ exports.selectArticle = (article_id) => {
     });
 };
 
-exports.selectArticles = () => {
+exports.selectArticles = (topic) => {
+  const validTopics = ['mitch', 'cats', 'paper']
+  if(!validTopics.includes(topic)) {
+    return Promise.reject({status: 400, msg: 'Bad request'})
+  }
+  const queryValues = []
   let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id) AS comment_count
-  FROM articles
-  FULL JOIN comments ON articles.article_id = comments.article_id
+  FROM articles FULL JOIN comments ON articles.article_id = comments.article_id`
+
+  if(topic) {
+    queryString += ` WHERE topic = $1`
+    queryValues.push(topic)
+  }
+
+  queryString += `
   GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url
   ORDER BY created_at DESC`;
 
-  return db.query(queryString).then((result) => {
+  return db.query(queryString, queryValues).then((result) => {
     return result.rows;
   });
 };
