@@ -239,6 +239,22 @@ describe("/api/articles/:article_id/comments", () => {
         expect(comment.article_id).toBe(1);
       });
   });
+  test('POST:201 ignores unnecessary properties on the request object', () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "my two cents",
+      extra_property: "to be ignored"
+    };
+    return request(app)
+    .post('/api/articles/1/comments')
+    .send(newComment)
+    .expect(201)
+    .then((response) => {
+      const comment = response.body.comment
+      expect(comment).not.toHaveProperty('extra_property')
+      
+    })
+  });
   test("POST:400 responds with an appropriate status and error message when provided with an invalid comment (empty body)", () => {
     return request(app)
       .post("/api/articles/1/comments")
