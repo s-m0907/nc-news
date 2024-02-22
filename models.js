@@ -37,7 +37,7 @@ exports.selectArticles = (topic) => {
   
   if(topic) {
     if(!validTopics.includes(topic)) {
-      return Promise.reject({status: 400, msg: 'Bad request'})
+      return Promise.reject({status: 404, msg: 'Topic not found'})
     }
     queryString += ` WHERE topic = $1`
     queryValues.push(topic)

@@ -370,12 +370,21 @@ describe("/api/articles?topic", () => {
       })
     })
   });
-  test('GET:400 responds with status and error message when query topic does not exist', () => {
+  test('GET:200 should respond with an empty array when filtering by a topic with no articles', () => {
+    return request(app)
+    .get('/api/articles?topic=paper')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles.length).toBe(0)
+    })
+  });
+  test('GET:404 responds with status and error message when query topic does not exist', () => {
     return request(app)
     .get('/api/articles?topic=food')
-    .expect(400)
+    .expect(404)
     .then((response) => {
-      expect(response.body.msg).toBe('Bad request')
+      expect(response.body.msg).toBe('Topic not found')
     })
   });
 })
