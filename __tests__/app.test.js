@@ -341,7 +341,7 @@ describe("/api/users", () => {
   });
 });
 
-describe.only("/api/articles?topic", () => {
+describe("/api/articles?topic", () => {
   test('GET:200 accepts a topic query and responds with an array of articles filtered by topic', () => {
     return request(app)
     .get("/api/articles?topic=cats")
