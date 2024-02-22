@@ -340,3 +340,26 @@ describe("/api/users", () => {
       });
   });
 });
+
+describe.only("/api/articles?topic", () => {
+  test('GET:200 accepts a topic query and responds with an array of articles filtered by topic', () => {
+    return request(app)
+    .get("/api/articles?topic=cats")
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles.length).toBe(1)
+      articles.forEach((article) => {
+        expect(article.topic).toBe('cats')
+      })
+    })
+  });
+  test('GET:400 responds with status and error message when query topic does not exist', () => {
+    return request(app)
+    .get('/api/articles?topic=food')
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  });
+})
