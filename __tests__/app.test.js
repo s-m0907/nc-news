@@ -363,3 +363,16 @@ describe("/api/articles?topic", () => {
     })
   });
 })
+
+describe("FEATURE REQUEST /api/article/:article_id comment count", () => {
+  test('GET:200 responds with a specific article object with added property comment_count', () => {
+    return request(app)
+    .get('/api/articles/1')
+    .expect(200)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.comment_count).toBe(11)
+      expect(article.article_id).toBe(1)
+    })
+  });
+})

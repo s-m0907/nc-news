@@ -14,8 +14,9 @@ exports.readEndpoints = () => {
 };
 
 exports.selectArticle = (article_id) => {
+  
   return db
-    .query("SELECT * FROM articles WHERE article_id = $1;", [article_id])
+    .query("SELECT articles.author, title, articles.body, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT AS comment_count FROM articles FULL JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url", [article_id])
     .then((result) => {
       if (!result.rows[0]) {
         return Promise.reject({
@@ -31,7 +32,7 @@ exports.selectArticles = (topic) => {
   const validTopics = ['mitch', 'cats', 'paper']
   const queryValues = []
   
-  let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id) AS comment_count
+  let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT AS comment_count
   FROM articles FULL JOIN comments ON articles.article_id = comments.article_id`
   
   if(topic) {
