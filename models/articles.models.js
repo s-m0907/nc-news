@@ -1,11 +1,5 @@
-const db = require("./db/connection.js");
+const db = require("../db/connection.js");
 const fs = require("fs/promises");
-
-exports.selectTopics = () => {
-  return db.query(`SELECT * FROM topics`).then((result) => {
-    return result.rows;
-  });
-};
 
 exports.readEndpoints = () => {
   return fs.readFile("endpoints.json").then((endpoints) => {
@@ -126,15 +120,3 @@ exports.updateVotes = (votes, article) => {
     });
 };
 
-exports.removeComment = (comment) => {
-  return db
-    .query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [comment])
-    .then((result) => {
-      if (!result.rows[0]) {
-        return Promise.reject({
-          status: 404,
-          msg: `Comment not found`,
-        });
-      }
-    });
-};
