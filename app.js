@@ -1,15 +1,12 @@
 const express = require("express");
 const { getEndpoints } = require("./controllers/articles.controller.js");
 const { handleCustomErrors, handlePsqlErrors, handleServerErrors, handleInvalidEndpoint } = require("./errors.controller.js");
-const { getTopics } = require("./controllers/topics.controller.js");
 const app = express();
 const apiRouter = require('./routes/api-router.js');
 
 app.use('/api', apiRouter)
 
 app.use(express.json())
-
-
 
 app.get('/api', getEndpoints)
 
