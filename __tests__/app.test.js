@@ -401,3 +401,49 @@ describe("FEATURE REQUEST /api/article/:article_id comment count", () => {
     })
   });
 })
+
+describe('FEATURE REQUEST /api/articles sort and order queries', () => {
+  test('GET:200 responds with an array of article sorted by a valid column with default order desc', () => {
+    return request(app)
+    .get('/api/articles?sort_by=votes')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles).toBeSortedBy('votes', {descending: true})
+    })
+  });
+  test('GET:400 responds with status code and message when given an invalid sort_by', () => {
+    return request(app)
+    .get('/api/articles?sort_by=invalid')
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Invalid sort query')
+    })
+  });
+  test('GET:200 responds with array of articles wirh valid order query and default sortby', () => {
+    return request(app)
+    .get('/api/articles?order=asc')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles).toBeSortedBy('created_at', {ascending: true})
+    })
+  });
+  test('GET:400 responds with status code and err message when given an invalid order query', () => {
+    return request(app)
+    .get('/api/articles?order=alphabetical')
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Invalid order query')
+    })
+  });
+  test('GET:200 responds with array of articles sorted and ordered by given query', () => {
+    return request(app)
+    .get('/api/articles?sort_by=votes&order=asc')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles).toBeSortedBy('votes', {ascending: true})
+    })
+  })
+});
