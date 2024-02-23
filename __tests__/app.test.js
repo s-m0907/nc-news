@@ -469,3 +469,60 @@ describe('/api/users/:username', () => {
     })
   });
 });
+
+describe('/api/comments/:comment_id', () => {
+  test('PATCH:201 request body accepts a vote increment object and responds with the updated comment', () => {
+    const newVotes = { inc_votes : 1 }
+    return request(app)
+    .patch('/api/comments/1')
+    .send(newVotes)
+    .expect(201)
+    .then((response) => {
+      const comment = response.body.comment
+      expect(comment.votes).toBe(17)
+      expect(comment.comment_id).toBe(1)
+    })
+  });
+  test('PATCH:201 ignores unnecessary properties on request body', () => {
+    const newVotes = {inc_votes: 1, extra_property: 'ignore_me'}
+    return request(app)
+    .patch('/api/comments/1')
+    .send(newVotes)
+    .expect(201)
+    .then((response) => {
+      const comment = response.body.comment
+      expect(comment.votes).toBe(17)
+      expect(comment.comment_id).toBe(1)
+    })
+  });
+  test('PATCH:400 responds with status and error message when provided with invalid comment_id', () => {
+    const newVotes = {inc_votes: 1}
+    return request(app)
+    .patch('/api/comments/four')
+    .send(newVotes)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  });
+  test('PATCH:404 responds with status and error message when provided with valid bu non existent comment id', () => {
+    const newVotes = {inc_votes: 1}
+    return request(app)
+    .patch('/api/comments/999')
+    .send(newVotes)
+    .expect(404)
+    .then((response) => {
+      expect(response.body.msg).toBe('Comment not found')
+    })
+  });
+  test('PATCH:400 responds with status and error message when vote_inc value is invalid', () => {
+    const newVotes = {inc_votes: 'two'}
+    return request(app)
+    .patch('/api/comments/1')
+    .send(newVotes)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  });
+});
