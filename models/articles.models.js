@@ -120,3 +120,12 @@ exports.updateVotes = (votes, article) => {
     });
 };
 
+exports.insertArticle = (author, title, body, topic, article_img_url="https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700") => {
+if(!author || !title || !body || !topic) {
+  return Promise.reject({status: 400, msg: 'Bad request'})
+}  
+return db.query(`INSERT INTO articles (author, title, body, topic, article_img_url) VALUES ($1, $2, $3, $4, $5) RETURNING *`, [author, title, body, topic, article_img_url])
+.then((result) => {
+  return result.rows[0].article_id
+})
+}

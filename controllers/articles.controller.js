@@ -1,4 +1,4 @@
-const { readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment, updateVotes } = require('../models/articles.models')
+const { readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment, updateVotes, insertArticle } = require('../models/articles.models')
 
 exports.getEndpoints = (req, res, next) => {
     readEndpoints().then((endpoints) => {
@@ -45,6 +45,16 @@ exports.postComment = (req, res, next) => {
     const article_id = req.params.article_id
     updateVotes(newVotes, article_id).then((article) => {
         res.status(200).send({ article })
+    })
+    .catch(next)
+  }
+
+  exports.postArticle = (req, res, next) => {
+    const { author, title, body, topic, article_img_url } = req.body
+    insertArticle(author, title, body, topic, article_img_url).then((article_id) => {
+        selectArticle(article_id).then((article) => {
+            res.status(201).send( { article })
+        })
     })
     .catch(next)
   }

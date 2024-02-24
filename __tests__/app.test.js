@@ -526,3 +526,105 @@ describe('/api/comments/:comment_id', () => {
     })
   });
 });
+
+describe('/api/articles', () => {
+  test('POST:201 posts a new article from request body and returns that article', () => {
+    const newArticle = {
+      author: "rogersop",
+      title: "new article",
+      body: "Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.",
+      topic: "paper",
+      article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(newArticle)
+    .expect(201)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.author).toBe('rogersop')
+      expect(article).toHaveProperty('article_id')
+      expect(article).toHaveProperty('created_at')
+      expect(article).toHaveProperty('votes')
+      expect(article.title).toBe('new article')
+      expect(article.topic).toBe('paper')
+      expect(article).toHaveProperty('comment_count')
+    })
+  });
+  test('POST:201 ignores unnecessary properties on request body', () => {
+    const newArticle = {
+      author: "rogersop",
+      title: "new article",
+      body: "Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.",
+      topic: "paper",
+      article_img_url: "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+      extra_property: 'ignore_me'
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(newArticle)
+    .expect(201)
+    .then((response) => {
+      const article = response.body.article
+      expect(article).not.toHaveProperty('extra_property')
+    })
+  });
+  test('POST:201 inserts default articles img url if no url provided', () => {
+    const newArticle = {
+        author: "rogersop",
+        title: "new article",
+        body: "Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.",
+        topic: "paper",
+    }
+    return request(app)
+    .post('/api/articles')
+    .send(newArticle)
+    .expect(201)
+    .then((response) => {
+      const article = response.body.article
+      expect(article.article_img_url).toBe('https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700')
+  })
+})
+test('POST:400 responds with status code and error when sent an invalid article object', () => {
+  const invalidArticle = {
+    a_property: 'a string'
+}
+return request(app)
+.post('/api/articles')
+.send(invalidArticle)
+.expect(400)
+.then((response) => {
+  expect(response.body.msg).toBe('Bad request')
+})
+})
+test('POST:404 reponds with status code and error when user does not exist', () => {
+  const newArticle = {
+    author: "not_a_user",
+    title: "new article",
+    body: "Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.",
+    topic: "paper",
+}
+return request(app)
+.post('/api/articles')
+.send(newArticle)
+.expect(404)
+.then((response) => {
+  expect(response.body.msg).toBe('Not found')
+})
+})
+test('POST:404 reponds with status code and error when topic does not exist', () => {
+  const newArticle = {
+    author: "rogersop",
+    title: "new article",
+    body: "Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.",
+    topic: "not_a_topic",
+}
+return request(app)
+.post('/api/articles')
+.send(newArticle)
+.expect(404)
+.then((response) => {
+  expect(response.body.msg).toBe('Not found')
+})
+})
+})

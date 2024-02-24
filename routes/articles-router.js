@@ -1,6 +1,6 @@
 const express = require("express");
 const articleRouter = require('express').Router()
-const { getArticleById, getArticles, getCommentsByArticleId, postComment, patchVotes} = require("../controllers/articles.controller.js");
+const { getArticleById, getArticles, getCommentsByArticleId, postComment, patchVotes, postArticle} = require("../controllers/articles.controller.js");
 
 articleRouter.use(express.json())
 
@@ -10,6 +10,7 @@ articleRouter.route('/:article_id')
 
 articleRouter.route('/')
 .get(getArticles)
+.post(postArticle)
 
 articleRouter.route('/:article_id/comments')
 .get(getCommentsByArticleId)
