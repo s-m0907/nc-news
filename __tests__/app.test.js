@@ -546,9 +546,11 @@ describe('/api/articles', () => {
       expect(article).toHaveProperty('article_id')
       expect(article).toHaveProperty('created_at')
       expect(article).toHaveProperty('votes')
+      expect(article.body).toBe('Hyperparameter tuning bias conditional probability reinforcement learning categorical data expert system k-fold cross validation feature extraction overfitting precision objective function. K-nearest neighbors markov chain algorithm parameter scikit-learn logistic regression stochastic.')
       expect(article.title).toBe('new article')
       expect(article.topic).toBe('paper')
       expect(article).toHaveProperty('comment_count')
+      expect(article).toHaveProperty('article_img_url')
     })
   });
   test('POST:201 ignores unnecessary properties on request body', () => {
