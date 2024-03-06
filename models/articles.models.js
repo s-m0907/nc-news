@@ -24,12 +24,12 @@ exports.selectArticle = (article_id) => {
     });
 };
 
-exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc') => {
+exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit = 10, p = 1) => {
   const validTopics = ["mitch", "cats", "paper"];
   const queryValues = [];
 
   let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT AS comment_count
-  FROM articles FULL JOIN comments ON articles.article_id = comments.article_id`;
+  FROM articles FULL JOIN comments ON articles.article_id = comments.article_id `;
 
 if(!['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url'].includes(sort_by)) {
   return Promise.reject({ status: 400, msg: "Invalid sort query" })
@@ -47,9 +47,11 @@ if(!['asc', 'desc'].includes(order)) {
     queryValues.push(topic);
   }
 
+  const offset = (p - 1) * limit
+
   queryString += `
   GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url
-  ORDER BY ${sort_by} ${order}`;
+  ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
 
   return db.query(queryString, queryValues).then((result) => {
     return result.rows;

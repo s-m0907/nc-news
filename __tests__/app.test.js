@@ -630,3 +630,36 @@ return request(app)
 })
 })
 })
+
+describe('api/articles GET query pagination', () => {
+  test('GET:200 should return an article array of max length 10 by default', () => {
+    return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      console.log(articles)
+      expect(articles.length).toBe(10)
+    })
+  });
+  test('GET:200 accepts a limit query and returns an array paginated to that limit', () => {
+    return request(app)
+    .get('/api/articles?limit=5')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles.length).toBe(5)
+    })
+  });
+  test('GET:200 accepts a limit and page query and returns second page of paginated array', () => {
+    return request(app)
+    .get('/api/articles?sort_by=article_id&order=asc&limit=5&p=2')
+    .expect(200)
+    .then((response) => {
+      const articles = response.body.articles
+      expect(articles.length).toBe(5)
+      expect(articles).toBeSortedBy('article_id')
+      expect(articles[0].article_id).toBe(6)
+    })
+  });
+});
