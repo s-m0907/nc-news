@@ -58,11 +58,16 @@ if(!['asc', 'desc'].includes(order)) {
   });
 };
 
-exports.selectCommentsByArticle = (article) => {
+exports.selectCommentsByArticle = (article, limit = 10, p = 1) => {
   let queryString = `SELECT * FROM comments`;
   const queryValues = [];
   queryValues.push(article);
-  queryString += ` WHERE article_id = $1 ORDER BY created_at DESC`;
+  queryValues.push(limit)
+
+  const offset = (p - 1) * limit
+  queryValues.push(offset)
+
+  queryString += ` WHERE article_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`;
 
   return db.query(queryString, queryValues).then((result) => {
     if (!result.rows[0]) {

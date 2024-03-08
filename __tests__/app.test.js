@@ -193,7 +193,7 @@ describe("/api/articles/:article_id/comments", () => {
           expect(comment).toHaveProperty("body");
           expect(comment.article_id).toBe(1);
         });
-        expect(comments.length).toBe(11);
+        // expect(comments.length).toBe(11);
         expect(comments[0].body).toBe("I hate streaming noses");
         expect(comments[0].author).toBe("icellusedkars");
       });
@@ -638,7 +638,6 @@ describe('api/articles GET query pagination', () => {
     .expect(200)
     .then((response) => {
       const articles = response.body.articles
-      console.log(articles)
       expect(articles.length).toBe(10)
     })
   });
@@ -661,5 +660,53 @@ describe('api/articles GET query pagination', () => {
       expect(articles).toBeSortedBy('article_id')
       expect(articles[0].article_id).toBe(6)
     })
+  });
+});
+describe('api/articles/:article_id/comments GET query pagination', () => {
+  test('GET:200 should return a comments array for a specific article with max length 10 by default', () => {
+    return request(app)
+    .get('/api/articles/1/comments')
+    .expect(200)
+    .then((response) => {
+      const comments = response.body.comments
+      expect(comments.length).toBe(10)
+    })
+  });
+  test('GET:200 accepts a limit query and returns an array paginated to that limit', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=5')
+    .expect(200)
+    .then((response) => {
+      const comments = response.body.comments
+      expect(comments.length).toBe(5)
+    })
+  });
+  test('GET:200 accepts a limit and page query and returns second page of paginated array', () => {
+    return request(app)
+    .get('/api/articles/1/comments?limit=5&p=2')
+    .expect(200)
+    .then((response) => {
+      const comments = response.body.comments
+      expect(comments.length).toBe(5)
+      expect(comments[0].comment_id).toBe(8)
+    })
+  });
+});
+
+describe('/api/topics POST', () => {
+  test('POST:201 should accept a topic object on request body, post to topics and respond with the posted topic', () => {
+    const newTopic = {
+      "slug": "topic name here",
+      "description": "description here"
+    }
+    return request(app)
+    .post('/api/topics')
+    .send(newTopic)
+    .expect(201)
+    .then((response) => {
+      expect(response.body.topic).toEqual({"slug": "topic name here",
+      "description": "description here"})
+    })
+
   });
 });
