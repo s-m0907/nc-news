@@ -5,3 +5,11 @@ exports.selectTopics = () => {
       return result.rows;
     });
   };
+
+  exports.insertTopic = (newTopic) => {
+    const queryValues = [newTopic.slug, newTopic.description]
+    return db.query(`INSERT INTO topics (slug, description) VALUES ($1, $2) RETURNING *`, queryValues)
+    .then((result) => {
+      return result.rows[0]
+    })
+  }
