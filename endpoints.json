@@ -185,7 +185,13 @@
     "requestBodyFormat":
     {"slug": "topic name here",
     "description": "description here"},
+    "queries": [],
     "exampleResponse": {"slug": "topic name here",
     "description": "description here"}
+  },
+  "DELETE /api/articles" : {
+    "description": "deletes a specific article and it's associated comments",
+    "queries": [],
+    "exampleResponse": {}
   }
 }
