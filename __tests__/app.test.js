@@ -9,17 +9,6 @@ beforeEach(() => seed(data));
 
 afterAll(() => db.end());
 
-describe("404 Invalid Endpoint", () => {
-  test("GET:404 responds with status code and error message when passed an invalid endpoint", () => {
-    return request(app)
-      .get("/api/not-a-route")
-      .expect(404)
-      .then((response) => {
-        expect(response.body.msg).toBe("Not found");
-      });
-  });
-});
-
 describe("/api/topics", () => {
   test("GET:200 responds with an array of topic objects", () => {
     return request(app)
@@ -44,6 +33,14 @@ describe("/api", () => {
       .then((response) => {
         expect(typeof response.body).toBe("object");
         expect(response.body).toHaveProperty("endpoints");
+      });
+  });
+  test("GET:404 responds with status code and error message when passed an invalid endpoint", () => {
+    return request(app)
+      .get("/api/not-a-route")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Not found");
       });
   });
 });
