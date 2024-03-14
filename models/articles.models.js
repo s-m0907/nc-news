@@ -30,7 +30,7 @@ exports.selectArticles = (topics, topic, sort_by = 'created_at', order = 'desc',
   let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT AS comment_count
   FROM articles FULL JOIN comments ON articles.article_id = comments.article_id `;
 
-if(!['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url'].includes(sort_by)) {
+if(!['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'].includes(sort_by)) {
   return Promise.reject({ status: 400, msg: "Invalid sort query" })
 }
 
