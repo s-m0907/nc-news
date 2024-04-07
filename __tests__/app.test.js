@@ -706,6 +706,19 @@ describe('/api/topics POST', () => {
     })
 
   });
+  test('POST:400 should return status and error message when sent an invalid topic object', () => {
+    const newTopic = {
+      "slug": "",
+      "description": ""
+    }
+    return request(app)
+    .post('/api/topics')
+    .send(newTopic)
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Invalid Topic Object')
+    })
+  });
 });
 
 describe('/api/articles/:article_id', () => {

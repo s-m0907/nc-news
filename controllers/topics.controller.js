@@ -8,8 +8,8 @@ exports.getTopics = (req, res, next) => {
 }
 
 exports.postTopic = (req, res, next) => { 
-    const newTopic = req.body;
-    insertTopic(newTopic).then((topic) => {
+    const {slug, description} = req.body;
+    insertTopic(slug, description).then((topic) => {
         res.status(201).send({topic})
     })
     .catch(next)
