@@ -1,4 +1,4 @@
-const { readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment, updateVotes, insertArticle, removeArticle, deleteComments } = require('../models/articles.models')
+const { readEndpoints, selectArticle, selectArticles, selectCommentsByArticle, insertComment, updateVotes, insertArticle, removeArticle, deleteComments, calculateTotalArticles } = require('../models/articles.models')
 const { selectTopics } = require('../models/topics.models')
 
 exports.getEndpoints = (req, res, next) => {
@@ -16,18 +16,17 @@ exports.getArticleById = (req, res, next) => {
     .catch(next)
 }
 
-exports.getArticles = (req, res, next) => {
-    selectTopics()
-        .then((topics) => {
-            const validTopics = topics.map((topic) => topic.slug);
-            const { topic, sort_by, order, limit, p } = req.query;
-            return selectArticles(validTopics, topic, sort_by, order, limit, p);
-        })
-        .then((articles) => {
-            res.status(200).send({ articles });
-        })
-        .catch(next) ;
-};
+exports.getArticles = async (req, res, next) => {
+    const { topic, sort_by, order, limit, p } = req.query;
+    try{
+        const topics = await selectTopics()
+        const validTopics = topics.map((topic) => topic.slug);
+        const totalCount = await calculateTotalArticles()
+        const articles = await selectArticles(validTopics, topic, sort_by, order, limit, p)
+        const response = res.status(200).send({articles, totalCount})
+    } catch (error) {
+        next(error)
+    }}
 
 
 exports.getCommentsByArticleId = (req, res, next) => {

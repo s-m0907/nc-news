@@ -744,3 +744,17 @@ describe('/api/articles/:article_id', () => {
     })
   });
 });
+
+describe('/api/articles', () => {
+  test('GET:200 responds with array of articles and a totalCount property', () => {
+    return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then((response) => {
+      expect(response.body).toHaveProperty('totalCount')
+      expect(typeof response.body.totalCount).toBe('number')
+      expect(response.body.totalCount).toBe(13)
+    })
+  });
+  
+});
