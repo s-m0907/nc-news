@@ -7,15 +7,6 @@ exports.readEndpoints = () => {
   });
 };
 
-exports.calculateTotalArticles = () => {
-  return db
-  .query(
-    "SELECT * FROM articles"
-  ).then((result) => {
-    return result.rowCount
-  })
-}
-
 exports.selectArticle = (article_id) => {
   return db
     .query(
@@ -37,7 +28,7 @@ exports.selectArticles = (topics, topic, sort_by = 'created_at', order = 'desc',
   const queryValues = [];
 
   let queryString = `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, COUNT(comment_id)::INT AS comment_count
-  FROM articles FULL JOIN comments ON articles.article_id = comments.article_id `;
+  FROM articles FULL JOIN comments ON articles.article_id = comments.article_id`;
 
 if(!['author', 'title', 'article_id', 'topic', 'created_at', 'votes', 'article_img_url', 'comment_count'].includes(sort_by)) {
   return Promise.reject({ status: 400, msg: "Invalid sort query" })
@@ -55,16 +46,21 @@ if(!['asc', 'desc'].includes(order)) {
     queryValues.push(topic);
   }
 
+  queryString += ` GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url`  
+  
+  const countQuery = `SELECT COUNT(*)::INT AS total_count FROM (${queryString}) AS subquery`
+  
   const offset = (p - 1) * limit
-
-  queryString += `
-  GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url
-  ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
-
-  return db.query(queryString, queryValues).then((result) => {
-    return result.rows;
-  });
-};
+  queryString += ` ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${offset}`;
+  
+  return Promise.all([
+    db.query(queryString, queryValues),
+    db.query(countQuery, queryValues)
+  ]).then(([articlesResult, countResult]) => {
+    const totalCount = countResult.rows[0].total_count;
+    return { articles: articlesResult.rows, totalCount };
+  })
+}
 
 exports.selectCommentsByArticle = (article, limit = 10, p = 1) => {
   let queryString = `SELECT * FROM comments`;
