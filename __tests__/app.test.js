@@ -756,5 +756,12 @@ describe('/api/articles', () => {
       expect(response.body.totalCount).toBe(13)
     })
   });
-  
+  test('GET:200 responds with correct totalCount when passed a topic query', () => {
+    return request(app)
+    .get('/api/articles?topic=cats')
+    .expect(200)
+    .then((response) => {
+      expect(response.body.totalCount).toBe(1)
+    })
+  })
 });

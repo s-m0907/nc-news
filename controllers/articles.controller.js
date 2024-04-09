@@ -18,15 +18,15 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getArticles = async (req, res, next) => {
     const { topic, sort_by, order, limit, p } = req.query;
-    try{
-        const topics = await selectTopics()
+    try {
+        const topics = await selectTopics();
         const validTopics = topics.map((topic) => topic.slug);
-        const totalCount = await calculateTotalArticles()
-        const articles = await selectArticles(validTopics, topic, sort_by, order, limit, p)
-        const response = res.status(200).send({articles, totalCount})
+        const { articles, totalCount } = await selectArticles(validTopics, topic, sort_by, order, limit, p);
+        res.status(200).send({ articles, totalCount });
     } catch (error) {
-        next(error)
-    }}
+        next(error);
+    }
+}
 
 
 exports.getCommentsByArticleId = (req, res, next) => {
