@@ -7,6 +7,15 @@ exports.readEndpoints = () => {
   });
 };
 
+exports.calculateTotalArticles = () => {
+  return db
+  .query(
+    "SELECT * FROM articles"
+  ).then((result) => {
+    return result.rowCount
+  })
+}
+
 exports.selectArticle = (article_id) => {
   return db
     .query(
